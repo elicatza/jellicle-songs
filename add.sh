@@ -33,6 +33,7 @@ VALID_ARGUMENTS="$?"
 
 if [ $VALID_ARGUMENTS -ne 0 ]; then
     usage
+    exit 1
 fi
 
 eval set -- "${OPTS}"
@@ -41,9 +42,14 @@ eval set -- "${OPTS}"
 while true; do
     case "$1" in
         -h | --help)
-            printf "Help\n"
-            shift
-            continue
+            printf "Add new music\n
+            -h, --help    \tPrint help and exit
+            -p, --playlist\tAdd playlist
+            -s, --single  \tAdd single song
+            -a, --append  \tAdd to directory
+            -s, --single  \tMake new directory
+            -m, --metadata\tDownload with metadata\n"
+            exit 1
             ;;
         -p | --playlist)
             PLAYLIST_OPT=true

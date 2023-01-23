@@ -9,7 +9,8 @@ for i in "${dependencies[@]}"; do
     }
 done
 
-find_dir="tmp"
+find_dir=$(find -maxdepth 1 -type d | cut -d '/' -f 2 | fzf | sed 's/\ /\\\ /g')
+# find_dir="tmp"
 
 find "${find_dir}" -type d | sed "s/^${find_dir}/${find_dir}-cpy/1" | xargs mkdir
 # Make dir at new location
@@ -28,7 +29,6 @@ done
 
 # Strip metadata
 # Embed cover in local pwd
-# TODO title metadata
 find "${find_dir}" -type f -name "*.m4a" -o -name "*.mp3" | while read f; do
     f=$(echo "${f}" | sed "s/^[^\/]*\//${find_dir}\//1")
     cover=$(find $(dirname "${f}") -type f -name "*.jpg" -o -name "*.png")

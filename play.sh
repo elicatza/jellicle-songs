@@ -32,9 +32,10 @@ eval set -- "${OPTS}"
 while true; do
     case "$1" in
         -h | --help)
-            printf "Help\n"
-            shift
-            continue
+            printf "Play music\n
+            -h, --help  \tPrint help and exit
+            -w, --random\tPlay random music\n"
+            exit 1
             ;;
         -r | random)
             op_random=true
@@ -53,7 +54,7 @@ while true; do
 done
 
 if [ $op_random = true ]; then
-    find -mindepth 2 -type f -name "*.m4a" -o -name "*.mp3" | \
+    find -mindepth 2 -type f -name "*.m4a" -o -name "*.mp3" -o -name "*.weba" | \
         sort -R | \
         awk '{printf "\"%s\" ", $0}' | \
         xargs mpv --no-video
