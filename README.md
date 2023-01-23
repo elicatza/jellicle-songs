@@ -1,5 +1,5 @@
 # Jellicle songs
-My music manager that is a nightmare to manage, but works incredibly well.
+My music manager that is a nightmare to manage, but works surprisingly well.
 
 ## Usage
 Add [n]ew [p]laylist with [m]etadata
@@ -26,3 +26,6 @@ WARNING: Now it can possibly do weird things with invalid input
 
 There is also something going wrong in embed.sh.
 50% of the time it works every time.
+
+
+Rewrite program in rust
