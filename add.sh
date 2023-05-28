@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-dependencies=( "yt-dlp" )
+dependencies=( "yt-dlp" "fzf" )
 
 for i in "${dependencies[@]}"; do
     command -v $i > /dev/null 2>&1 || {
