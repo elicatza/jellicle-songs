@@ -1,6 +1,8 @@
-./tmp
-./tmp-cpy
-./mathea
-./musicals
-./musicals-black-list
-./recordings
+all
+musicals
+recordings
+tmp
+tmp-cpy
+covers.sh
+albums
+playlists

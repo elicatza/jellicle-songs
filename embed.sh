@@ -18,28 +18,32 @@ find "${find_dir}" -type d | sed "s/^${find_dir}/${find_dir}-cpy/1" | xargs mkdi
 
 # Extract first song cover in each dir, and crop if needed
 find "${find_dir}" -mindepth 1 -name "01 *" -o -name "1 *" | while read f; do
-    f=$(echo "${f}" | sed "s/^[^\/]*\//${find_dir}\//1")
+
+    # Hack needed if -stdin is enabled in ffmpeg:
+    # f=$(echo "${f}" | sed "s/^[^\/]*\//${find_dir}\//1")
+
     curdir=$(dirname "$f")
     if [[ -n $(ffprobe "${f}" 2> >(grep 1280x720)) ]]; then
-        ffmpeg -i "$f" -map 0:v -map -0:V -filter "crop=iw-560" "${curdir}/cover.png"
+        ffmpeg -i "$f" -map 0:v -map -0:V -filter "crop=iw-560" -nostdin "${curdir}/cover.png"
     else
-        ffmpeg -i "$f" -map 0:v -map -0:V -c copy "${curdir}/cover.png"
+        ffmpeg -i "$f" -map 0:v -map -0:V -c copy -nostdin "${curdir}/cover.png"
     fi
 done
 
 # Strip metadata
 # Embed cover in local pwd
 find "${find_dir}" -type f -name "*.m4a" -o -name "*.mp3" | while read f; do
-    f=$(echo "${f}" | sed "s/^[^\/]*\//${find_dir}\//1")
     cover=$(find $(dirname "${f}") -type f -name "*.jpg" -o -name "*.png")
     new_f=$(echo "${f}" | sed "s/^${find_dir}/${find_dir}-cpy/1")
     echo -e "${f}\n${new_f}\n${cover}\n\n"
     ffmpeg -i "${f}" -i "${cover}" -map 0:a -map 1 \
         -c:a copy -c:v:0 png -disposition:v:0 attached_pic \
         -metadata album="$(basename "$(dirname "${cover}")" | sed 's/-/ /g')" \
+        -metadata artist="$(basename "$(dirname "${cover}")" | sed 's/-/ /g')" \
         -metadata title="$(basename "${new_f}" | rev | cut -d '.' -f 1 --complement | rev)" \
         -metadata description="" \
         -metadata synopsis="" \
+        -nostdin \
         "${new_f}"
 done
 

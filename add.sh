@@ -16,19 +16,22 @@ function usage {
     exit 1
 }
 
+PLAYLIST_ITEMS_OPT=false
 PLAYLIST_OPT=false
 SINGLE_OPT=false
 
 APPEND_OPT=false
 NEW_OPT=false
-METADATA_OPT=false
 
 is_new=true
 is_single=true
 
 
+args=""
 
-OPTS=$(getopt -o 'hanpsm' --longoptions 'help,append,new,playlist,single,metadata' -n "add.sh" -- "$@")
+
+
+OPTS=$(getopt -o 'hanpsmI:' --longoptions 'help,append,new,playlist,single,metadata,playlist-items:' -n "add.sh" -- "$@")
 VALID_ARGUMENTS="$?"
 
 if [ $VALID_ARGUMENTS -ne 0 ]; then
@@ -45,6 +48,7 @@ while true; do
             printf "Add new music\n
             -h, --help    \tPrint help and exit
             -p, --playlist\tAdd playlist
+            -I, --playlist-items\tAdd playlist
             -s, --single  \tAdd single song
             -a, --append  \tAdd to directory
             -s, --single  \tMake new directory
@@ -53,28 +57,23 @@ while true; do
             ;;
         -p | --playlist)
             PLAYLIST_OPT=true
+            ;;
+        -I | --playlist-items)
+            PLAYLIST_ITEMS_OPT=true
             shift
-            continue
+            args="${args} --playlist-item ${1}"
             ;;
         -s | --single)
             SINGLE_OPT=true
-            shift
-            continue
             ;;
         -a | --append)
             APPEND_OPT=true
-            shift
-            continue
             ;;
         -n | -new)
             NEW_OPT=true
-            shift
-            continue
             ;;
         -m | -metadata)
-            METADATA_OPT=true
-            shift
-            continue
+            args="${args} --add-metadata --embed-thumbnail"
             ;;
         --)
             shift
@@ -85,11 +84,12 @@ while true; do
             exit 1
             ;;
     esac
+    shift
 done
 
 # Checks for conflicting flags. If so exit. 
 # If none is used, set default flag.
-if [ $SINGLE_OPT == true ] && [ $PLAYLIST_OPT == true ]; then
+if [ $SINGLE_OPT == true ] && ([ $PLAYLIST_OPT == true ] || [ $PLAYLIST_ITEMS_OPT == true ]); then
     printf "Conflicting flags: cannot use both single and playlist flag!\nExiting...\n"
     exit 0
 fi
@@ -99,7 +99,7 @@ if [ $NEW_OPT == true ] && [ $APPEND_OPT == true ]; then
     exit 0
 fi
 
-if [ $PLAYLIST_OPT == true ]; then
+if [ $PLAYLIST_OPT == true ] || [ $PLAYLIST_ITEMS_OPT == true ]; then
     is_single=false
 fi
 
@@ -153,13 +153,6 @@ fi
 
 
 echo $output_string
+echo $args
 
-if [ $METADATA_OPT == true ]; then
-    yt-dlp --format 'bestaudio[ext=m4a]' \
-        --add-metadata \
-        --embed-thumbnail \
-        --output "${output_string}" \
-        "${url}"
-else
-    yt-dlp -f 'bestaudio[ext=m4a]' -o "${output_string}" "${url}"
-fi
+yt-dlp -f 'bestaudio[ext=m4a]' $args -o "${output_string}" "${url}"

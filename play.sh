@@ -18,8 +18,10 @@ function usage {
 }
 
 op_random=false
+op_playlist=false
+PLAYLISTDIR="./playlists"
 
-OPTS=$(getopt -o 'rh' --longoptions 'random,help' -n "play.sh" -- "$@")
+OPTS=$(getopt -o 'prh' --longoptions 'playlist,random,help' -n "play.sh" -- "$@")
 
 VALID_ARGUMENTS="$?"
 
@@ -42,6 +44,11 @@ while true; do
             shift
             continue
             ;;
+        -p | playlist)
+            op_playlist=true
+            shift
+            continue
+            ;;
         --)
             shift
             break
@@ -58,6 +65,9 @@ if [ $op_random = true ]; then
         sort -R | \
         awk '{printf "\"%s\" ", $0}' | \
         xargs mpv --no-video
+elif [ $op_playlist = true ]; then
+    playlist=$(find "${PLAYLISTDIR}" -maxdepth 1 -type f | rev | cut -d "/" -f 1 | rev | fzf)
+    mpv --playlist="${PLAYLISTDIR}/${playlist}" --shuffle --no-video
 else
     category=$(find -maxdepth 1 -type d | cut -d '/' -f 2 | fzf | sed 's/\ /\\\ /g')
 
@@ -66,5 +76,3 @@ else
     # mpv $(echo "${dir}/${category}/${list}/*") --no-video --audio-device=alsa/bluealsa
     mpv $(echo "${dir}/${category}/${list}/*.m4a") --no-video
 fi
-
-
