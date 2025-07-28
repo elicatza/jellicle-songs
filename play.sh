@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-dependencies=( "mpv" )
+dependencies=( "mpv" "tofi" )
 
 for i in "${dependencies[@]}"; do
     command -v $i > /dev/null 2>&1 || {
@@ -9,8 +9,7 @@ for i in "${dependencies[@]}"; do
     }
 done
 
-# play=$(ls -d -1 */ | fzf)
-dir=$(pwd)
+dir="./music"
 
 function usage {
     printf "Usage: ./play.sh [ -h | --help ]\n"
@@ -61,7 +60,7 @@ while true; do
 done
 
 if [ $op_random = true ]; then
-    find -mindepth 2 -type f -name "*.m4a" -o -name "*.mp3" -o -name "*.weba" | \
+    find "$dir" -mindepth 2 -type f -name "*.m4a" -o -name "*.mp3" -o -name "*.ogg" -o -name "*.mp4" -o -name "*.weba" | \
         sort -R | \
         awk '{printf "\"%s\" ", $0}' | \
         xargs mpv --no-video
@@ -69,10 +68,12 @@ elif [ $op_playlist = true ]; then
     playlist=$(find "${PLAYLISTDIR}" -maxdepth 1 -type f | rev | cut -d "/" -f 1 | rev | fzf)
     mpv --playlist="${PLAYLISTDIR}/${playlist}" --shuffle --no-video
 else
-    category=$(find -maxdepth 1 -type d | cut -d '/' -f 2 | fzf | sed 's/\ /\\\ /g')
+    category=$(find "$(pwd)/music" -maxdepth 1 -mindepth 1 -type d | rev | cut -d '/' -f 1 | rev | tofi)
 
-    list=$(find "$category" -maxdepth 1 -type d | cut -d '/' -f 2 | fzf | sed 's/\ /\\\ /g')
+    list=$(find "${dir}/${category}" -maxdepth 1 -mindepth 1 -type d | rev | cut -d '/' -f 1 | rev | tofi)
 
-    # mpv $(echo "${dir}/${category}/${list}/*") --no-video --audio-device=alsa/bluealsa
-    mpv $(echo "${dir}/${category}/${list}/*.m4a") --no-video
+    find "${dir}/${category}/${list}" -type f -name "*.m4a" -o -name "*.ogg" -o -name "*.mp4" -o -name "*.mp3" | \
+        sort -n |
+        awk '{printf "\"%s\" ", $0}' | \
+        xargs mpv --no-video
 fi

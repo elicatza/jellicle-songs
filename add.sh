@@ -28,10 +28,11 @@ is_single=true
 
 
 args=""
+ffmpeg_args=""
 
 
 
-OPTS=$(getopt -o 'hanpsmI:' --longoptions 'help,append,new,playlist,single,metadata,playlist-items:' -n "add.sh" -- "$@")
+OPTS=$(getopt -o 'hanpsmI:' --longoptions 'help,append,new,playlist,single,from:,to:,metadata,playlist-items:' -n "add.sh" -- "$@")
 VALID_ARGUMENTS="$?"
 
 if [ $VALID_ARGUMENTS -ne 0 ]; then
@@ -48,7 +49,7 @@ while true; do
             printf "Add new music\n
             -h, --help    \tPrint help and exit
             -p, --playlist\tAdd playlist
-            -I, --playlist-items\tAdd playlist
+            -I, --playlist-items\tAdd playlist format `start_id`:`end_id` i.e. 1:25
             -s, --single  \tAdd single song
             -a, --append  \tAdd to directory
             -s, --single  \tMake new directory
@@ -62,6 +63,17 @@ while true; do
             PLAYLIST_ITEMS_OPT=true
             shift
             args="${args} --playlist-item ${1}"
+            ;;
+        --from)
+            shift
+            echo "Found: ${1}"
+            echo "Next: ${2}"
+            ffmpeg_args="${ffmpeg_args} -ss ${1}"
+            ;;
+        --to)
+            shift
+            echo "Found: ${1}"
+            ffmpeg_args="${ffmpeg_args} -to ${1}"
             ;;
         -s | --single)
             SINGLE_OPT=true
@@ -155,4 +167,10 @@ fi
 echo $output_string
 echo $args
 
-yt-dlp -f 'bestaudio[ext=m4a]' $args -o "${output_string}" "${url}"
+if [ -n "${ffmpeg_args}" ]; then
+    set -xe
+    title=$(yt-dlp --skip-download --print filename "${url}")
+    ffmpeg ${ffmpeg_args} -i $(yt-dlp -f "bestaudio[ext=m4a]" -g "${url}") -c copy "${full_path}${title}"
+else
+    yt-dlp -f 'bestaudio[ext=mp4]' $args -o "${output_string}" "${url}"
+fi

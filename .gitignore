@@ -1,8 +1,6 @@
-all
-musicals
-recordings
 tmp
 tmp-cpy
 covers.sh
-albums
+music/
 playlists
+headers.txt
