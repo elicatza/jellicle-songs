@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-dependencies=( "yt-dlp" "fzf" )
+dependencies=( "yt-dlp" "tofi" )
 
 for i in "${dependencies[@]}"; do
     command -v $i > /dev/null 2>&1 || {
@@ -128,7 +128,7 @@ if [ -z $url ]; then
     exit 0;
 fi
 
-dest_dir=$(find "${parent_dir}" -maxdepth 1 -type d | rev | cut -d "/" -f 1 | rev | fzf)
+dest_dir=$(find "${parent_dir}" -maxdepth 1 -type d | rev | cut -d "/" -f 1 | rev | tofi)
 if [ -z "$dest_dir" ]; then
     printf "Exiting...\n"
     exit 1
@@ -143,7 +143,7 @@ if [ $is_new == true ]; then
     dest_name=$(echo "$dest_name" | sed 's/\ /-/g')
 else
     # Choose old directory
-    dest_name=$(find "${parent_dir}${dest_dir}" -maxdepth 1 -type d | rev | cut -d "/" -f 1 | rev | fzf)
+    dest_name=$(find "${parent_dir}${dest_dir}" -maxdepth 1 -type d | rev | cut -d "/" -f 1 | rev | tofi)
 fi
 
 full_path="${parent_dir}${dest_dir}${dest_name}/"

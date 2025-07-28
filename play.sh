@@ -65,7 +65,7 @@ if [ $op_random = true ]; then
         awk '{printf "\"%s\" ", $0}' | \
         xargs mpv --no-video
 elif [ $op_playlist = true ]; then
-    playlist=$(find "${PLAYLISTDIR}" -maxdepth 1 -type f | rev | cut -d "/" -f 1 | rev | fzf)
+    playlist=$(find "${PLAYLISTDIR}" -maxdepth 1 -type f | rev | cut -d "/" -f 1 | rev | tofi)
     mpv --playlist="${PLAYLISTDIR}/${playlist}" --shuffle --no-video
 else
     category=$(find "$(pwd)/music" -maxdepth 1 -mindepth 1 -type d | rev | cut -d '/' -f 1 | rev | tofi)
